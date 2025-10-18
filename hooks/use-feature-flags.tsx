@@ -7,6 +7,7 @@ export const FeatureFlagsContext = createContext<FeatureFlags>({
   shareConversations: false,
   uploadFiles: false,
   weatherTool: false,
+  teacherMode: false,
 });
 
 export function FeatureFlagsProvider({

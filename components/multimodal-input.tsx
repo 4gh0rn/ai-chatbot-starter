@@ -50,6 +50,7 @@ import {
 } from "./icons";
 import { PreviewAttachment } from "./preview-attachment";
 import { SuggestedActions } from "./suggested-actions";
+import { TeacherModeIconToggle } from "./teacher-mode-icon-toggle";
 import { Button } from "./ui/button";
 import type { VisibilityType } from "./visibility-selector";
 
@@ -358,6 +359,9 @@ function PureMultimodalInput({
                 status={status}
               />
             )}
+            <TeacherModeIconToggle
+              chatId={chatId}
+            />
             <ModelSelectorCompact
               onModelChange={onModelChange}
               selectedModelId={selectedModelId}

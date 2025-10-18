@@ -26,6 +26,29 @@ import { MessageReasoning } from "./message-reasoning";
 import { PreviewAttachment } from "./preview-attachment";
 import { Weather } from "./weather";
 
+// Helper function to check if a message was generated in Teacher Mode
+const isTeacherModeMessage = (message: ChatMessage): boolean => {
+  const textParts = message.parts?.filter(p => p.type === "text") || [];
+  const isTeacher = textParts.some(part => 
+    part.text?.includes("Quick Answer") || 
+    part.text?.includes("Key Takeaways") ||
+    part.text?.includes("Detailed Explanation") ||
+    part.text?.includes("Next Steps") ||
+    part.text?.includes("💡 Teacher Mode Tips") ||
+    part.text?.includes("Code Validation Results") ||
+    part.text?.includes("Step-by-step") ||
+    part.text?.includes("step-by-step")
+  );
+  
+  // Debug log to help troubleshoot
+  if (message.role === "assistant") {
+    console.log("Message content:", textParts[0]?.text?.substring(0, 200));
+    console.log("Is teacher mode:", isTeacher);
+  }
+  
+  return isTeacher;
+};
+
 const PurePreviewMessage = ({
   chatId,
   message,
@@ -69,8 +92,32 @@ const PurePreviewMessage = ({
         })}
       >
         {message.role === "assistant" && (
-          <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
-            <SparklesIcon size={14} />
+          <div className={cn(
+            "-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full ring-1",
+            // Check if this is a teacher mode response
+            isTeacherModeMessage(message)
+              ? "bg-blue-50 ring-blue-200 text-blue-600 dark:bg-blue-950/30 dark:ring-blue-800 dark:text-blue-400"
+              : "bg-background ring-border"
+          )}>
+            {/* Teacher Mode gets a graduation cap icon, normal mode gets sparkles */}
+            {isTeacherModeMessage(message) ? (
+              <svg
+                className="h-3.5 w-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                />
+              </svg>
+            ) : (
+              <SparklesIcon size={14} />
+            )}
           </div>
         )}
 
@@ -131,7 +178,10 @@ const PurePreviewMessage = ({
                         "w-fit break-words rounded-2xl px-3 py-2 text-right text-white":
                           message.role === "user",
                         "bg-transparent px-0 py-0 text-left":
-                          message.role === "assistant",
+                          message.role === "assistant" && !isTeacherModeMessage(message),
+                        // Teacher Mode styling
+                        "rounded-lg border border-blue-200 bg-blue-50/30 px-4 py-3 text-left dark:border-blue-800 dark:bg-blue-950/20":
+                          message.role === "assistant" && isTeacherModeMessage(message),
                       })}
                       data-testid="message-content"
                       style={
