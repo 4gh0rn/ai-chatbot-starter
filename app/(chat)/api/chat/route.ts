@@ -30,6 +30,7 @@ import { createDocument } from "@/lib/ai/tools/create-document";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { updateDocument } from "@/lib/ai/tools/update-document";
+import { validateTypeScript } from "@/lib/ai/tools/validate-typescript";
 import { isProductionEnvironment } from "@/lib/constants";
 import { ChatSDKError } from "@/lib/errors";
 import { FEATURE_WEATHER_TOOL } from "@/lib/feature-flags";
@@ -95,11 +96,13 @@ export async function POST(request: Request) {
       message,
       selectedChatModel,
       selectedVisibilityType,
+      teacherMode = false,
     }: {
       id: string;
       message: ChatMessage;
       selectedChatModel: ChatModel["id"];
       selectedVisibilityType: VisibilityType;
+      teacherMode?: boolean;
     } = requestBody;
 
     const session = await auth();
@@ -210,7 +213,7 @@ export async function POST(request: Request) {
       execute: ({ writer: dataStream }) => {
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
-          system: systemPrompt({ selectedChatModel, requestHints }),
+          system: systemPrompt({ selectedChatModel, requestHints, teacherMode }),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
           experimental_activeTools:
@@ -221,11 +224,13 @@ export async function POST(request: Request) {
                   "createDocument",
                   "updateDocument",
                   "requestSuggestions",
+                  ...(teacherMode ? ["validateTypeScript"] : []),
                 ] as (
                   | "getWeather"
                   | "createDocument"
                   | "updateDocument"
                   | "requestSuggestions"
+                  | "validateTypeScript"
                 )[]),
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
@@ -236,6 +241,8 @@ export async function POST(request: Request) {
               session,
               dataStream,
             }),
+            // Add TypeScript validation tool only in teacher mode for educational purposes
+            ...(teacherMode ? { validateTypeScript } : {}),
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,

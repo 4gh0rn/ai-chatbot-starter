@@ -30,6 +30,7 @@ import { useDataStream } from "./data-stream-provider";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
 import { getChatHistoryPaginationKey } from "./sidebar-history";
+import { useTeacherModeForChat } from "./teacher-mode-chat-toggle";
 import { toast } from "./toast";
 import type { VisibilityType } from "./visibility-selector";
 
@@ -57,6 +58,7 @@ export function Chat({
 
   const { mutate } = useSWRConfig();
   const { setDataStream } = useDataStream();
+  const { isTeacherMode } = useTeacherModeForChat(id);
 
   const [input, setInput] = useState<string>("");
   const [usage, setUsage] = useState<AppUsage | undefined>(initialLastContext);
@@ -91,6 +93,7 @@ export function Chat({
             message: request.messages.at(-1),
             selectedChatModel: currentModelIdRef.current,
             selectedVisibilityType: visibilityType,
+            teacherMode: isTeacherMode,
             ...request.body,
           },
         };
