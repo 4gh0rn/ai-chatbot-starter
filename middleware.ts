@@ -24,15 +24,15 @@ export async function middleware(request: NextRequest) {
     secureCookie: !isDevelopmentEnvironment,
   });
 
-  const openAuthPaths = ["/login", "/register", "/login/form"];
+  const openAuthPaths = ["/", "/login", "/register", "/login/form"];
 
   if (!token) {
-    // Allow unauthenticated users to view auth pages without forced guest provisioning.
+    // Allow unauthenticated users to view landing and auth pages without forced guest provisioning.
     if (openAuthPaths.includes(pathname)) {
       return NextResponse.next();
     }
-    // Redirect all other unauthenticated requests to landing page (/login)
-    return NextResponse.redirect(new URL("/login", request.url));
+    // Redirect all other unauthenticated requests to landing page
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   const isGuest = guestRegex.test(token?.email ?? "");
@@ -40,9 +40,9 @@ export async function middleware(request: NextRequest) {
   if (
     token &&
     !isGuest &&
-    ["/login", "/register", "/login/form"].includes(pathname)
+    ["/", "/login", "/register", "/login/form"].includes(pathname)
   ) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/chat", request.url));
   }
 
   // If guest accounts are disabled and the user is a guest, force upgrade path.
