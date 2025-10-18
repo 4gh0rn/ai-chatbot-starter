@@ -39,13 +39,7 @@ const isTeacherModeMessage = (message: ChatMessage): boolean => {
     part.text?.includes("Step-by-step") ||
     part.text?.includes("step-by-step")
   );
-  
-  // Debug log to help troubleshoot
-  if (message.role === "assistant") {
-    console.log("Message content:", textParts[0]?.text?.substring(0, 200));
-    console.log("Is teacher mode:", isTeacher);
-  }
-  
+
   return isTeacher;
 };
 
