@@ -29,7 +29,7 @@ import { Weather } from "./weather";
 // Helper function to check if a message was generated in Teacher Mode
 const isTeacherModeMessage = (message: ChatMessage): boolean => {
   const textParts = message.parts?.filter(p => p.type === "text") || [];
-  const isTeacher = textParts.some(part => 
+  return textParts.some(part => 
     part.text?.includes("Quick Answer") || 
     part.text?.includes("Key Takeaways") ||
     part.text?.includes("Detailed Explanation") ||
@@ -39,8 +39,6 @@ const isTeacherModeMessage = (message: ChatMessage): boolean => {
     part.text?.includes("Step-by-step") ||
     part.text?.includes("step-by-step")
   );
-
-  return isTeacher;
 };
 
 const PurePreviewMessage = ({
