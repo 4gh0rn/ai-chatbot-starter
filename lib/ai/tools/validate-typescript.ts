@@ -135,7 +135,7 @@ function validateCodeSyntax(code: string, language: "typescript" | "javascript")
 export const validateTypeScript = tool({
   description: `Validate TypeScript or JavaScript code for syntax errors and common issues. 
 This tool is especially useful in Teacher Mode to ensure generated code is error-free and follows best practices.`,
-  parameters: validateTypeScriptSchema,
+  inputSchema: validateTypeScriptSchema,
   execute: async (params) => {
     const { code, language } = params;
     const validation = validateCodeSyntax(code, language);
@@ -172,6 +172,11 @@ This tool is especially useful in Teacher Mode to ensure generated code is error
     result += `- Keep functions small and focused on a single task\n`;
     result += `- Use descriptive variable and function names\n`;
     
-    return result;
+    return {
+      content: result,
+      isValid: validation.isValid,
+      errorCount: validation.errors.length,
+      warningCount: validation.warnings.length
+    };
   },
 });

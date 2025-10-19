@@ -20,10 +20,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Check if running behind HTTPS proxy
+  const proto = request.headers.get('x-forwarded-proto');
+  const isSecure = proto === 'https' || process.env.NODE_ENV === 'production';
+  
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
-    secureCookie: !isDevelopmentEnvironment,
+    secureCookie: isSecure && proto === 'https', // Only use secure cookies with HTTPS
   });
 
   const isAuthPage = ["/", "/login", "/register", "/login/form"].includes(pathname);

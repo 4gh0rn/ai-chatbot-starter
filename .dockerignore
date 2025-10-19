@@ -1,0 +1,123 @@
+# Dockerignore for AI Chatbot Production Build
+# Reduces build context size and improves build speed
+
+# Development files
+.env.local
+.env.development
+.env.test
+
+# Node modules (will be installed in container)
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Next.js build artifacts
+.next/
+out/
+
+# Production build artifacts
+dist/
+build/
+
+# Testing
+coverage/
+.nyc_output
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Scripts (not needed in container)
+scripts/
+
+# Documentation
+*.md
+docs/
+CHANGELOG*
+LICENSE*
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Dependency directories
+.pnp
+.pnp.js
+
+# Yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Temporary folders
+tmp/
+temp/
+
+# Editor backup files
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*

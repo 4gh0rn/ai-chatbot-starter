@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   experimental: {
     ppr: true,
   },
+  // Enable standalone output for Docker
+  output: "standalone",
   images: {
     remotePatterns: [
       {

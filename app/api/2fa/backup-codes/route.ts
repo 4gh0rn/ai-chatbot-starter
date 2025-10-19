@@ -59,19 +59,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate new backup codes
-    const newBackupCodes = Array.from({ length: 8 }, () =>
-      Math.random().toString(36).substring(2, 8).toUpperCase()
-    );
-
-    await fetchMutation(api.users.regenerateBackupCodes, {
+    // Regenerate backup codes using Convex mutation
+    const result = await fetchMutation(api.users.regenerateBackupCodes, {
       userId: session.user.id as any,
-      newCodes: newBackupCodes,
     });
 
     return NextResponse.json({
       success: true,
-      backupCodes: newBackupCodes,
+      backupCodes: result.backupCodes,
     });
   } catch (error) {
     console.error("Backup codes regeneration error:", error);
