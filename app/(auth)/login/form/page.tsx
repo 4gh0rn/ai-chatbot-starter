@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useActionState, useEffect, useState } from "react";
 import { AuthForm } from "@/components/auth-form";
 import { SubmitButton } from "@/components/submit-button";
+import { TwoFactorVerification } from "@/components/two-factor-verification";
 import { toast } from "@/components/toast";
 import { type LoginActionState, login } from "../../actions";
 
@@ -13,6 +14,7 @@ export default function LoginFormPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [isSuccessful, setIsSuccessful] = useState(false);
+  const [showTwoFactor, setShowTwoFactor] = useState(false);
   const [state, formAction] = useActionState<LoginActionState, FormData>(
     login,
     {
@@ -29,18 +31,47 @@ export default function LoginFormPage() {
         type: "error",
         description: "Failed validating your submission!",
       });
+    } else if (state.status === "requires_2fa" && state.email) {
+      setEmail(state.email);
+      setShowTwoFactor(true);
     } else if (state.status === "success") {
       setIsSuccessful(true);
-      updateSession();
-      router.refresh();
+      // Update session and navigate with delay to ensure state is ready
+      updateSession().then(() => {
+        setTimeout(() => router.push("/chat"), 200);
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.status, router.refresh, updateSession]);
+  }, [state.status]);
 
   const handleSubmit = (formData: FormData) => {
     setEmail(formData.get("email") as string);
     formAction(formData);
   };
+
+  const handle2FASuccess = () => {
+    setIsSuccessful(true);
+    updateSession().then(() => {
+      setTimeout(() => router.push("/chat"), 200);
+    });
+  };
+
+  const handle2FACancel = () => {
+    setShowTwoFactor(false);
+    setEmail("");
+  };
+
+  if (showTwoFactor) {
+    return (
+      <div className="flex h-dvh w-screen items-start justify-center bg-background pt-12 md:items-center md:pt-0">
+        <TwoFactorVerification
+          email={email}
+          onSuccess={handle2FASuccess}
+          onCancel={handle2FACancel}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-dvh w-screen items-start justify-center bg-background pt-12 md:items-center md:pt-0">

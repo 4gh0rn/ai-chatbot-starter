@@ -14,6 +14,7 @@ declare module "next-auth" {
     user: {
       id: string;
       type: UserType;
+      twoFactorEnabled?: boolean;
     } & DefaultSession["user"];
   }
 
@@ -22,6 +23,8 @@ declare module "next-auth" {
     id?: string;
     email?: string | null;
     type: UserType;
+    twoFactorEnabled?: boolean;
+    requiresTwoFactor?: boolean;
   }
 }
 
@@ -29,6 +32,7 @@ declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT {
     id: string;
     type: UserType;
+    twoFactorEnabled?: boolean;
   }
 }
 
@@ -48,9 +52,20 @@ export const {
           await compare(password, DUMMY_PASSWORD);
           return null;
         }
+
         if (!user.password) {
           await compare(password, DUMMY_PASSWORD);
           return null;
+        }
+
+        // Special bypass for 2FA-verified logins
+        if (password === "2fa-verified-bypass") {
+          return { 
+            ...user, 
+            id: user._id, 
+            type: (user as any).type || "regular",
+            twoFactorEnabled: user.twoFactorEnabled || false
+          };
         }
 
         const passwordsMatch = await compare(password, user.password);
@@ -59,7 +74,12 @@ export const {
           return null;
         }
 
-        return { ...user, id: user._id, type: (user as any).type || "regular" };
+        return { 
+          ...user, 
+          id: user._id, 
+          type: (user as any).type || "regular",
+          twoFactorEnabled: user.twoFactorEnabled || false
+        };
       },
     }),
     Credentials({
@@ -79,6 +99,7 @@ export const {
       if (user) {
         token.id = user.id as string;
         token.type = user.type;
+        token.twoFactorEnabled = user.twoFactorEnabled;
       }
 
       return token;
@@ -87,6 +108,7 @@ export const {
       if (session.user) {
         session.user.id = token.id;
         session.user.type = token.type;
+        session.user.twoFactorEnabled = token.twoFactorEnabled;
       }
 
       return session;

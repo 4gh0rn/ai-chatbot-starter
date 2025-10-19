@@ -10,6 +10,7 @@ export type FeatureFlags = {
   uploadFiles: boolean;
   weatherTool: boolean;
   teacherMode: boolean;
+  twoFactorAuth: boolean;
 };
 
 const ENV_MAP: Record<keyof FeatureFlags, string> = {
@@ -18,6 +19,7 @@ const ENV_MAP: Record<keyof FeatureFlags, string> = {
   uploadFiles: "APP_ENABLE_UPLOAD_FILES",
   weatherTool: "APP_ENABLE_WEATHER_TOOL",
   teacherMode: "APP_ENABLE_TEACHER_MODE",
+  twoFactorAuth: "APP_ENABLE_TWO_FACTOR_AUTH",
 };
 
 const TRUTHY = new Set(["1", "true", "on", "yes"]);
@@ -50,6 +52,7 @@ export function getFeatureFlags(): FeatureFlags {
     uploadFiles: parseFlag(process.env[ENV_MAP.uploadFiles]),
     weatherTool: parseFlag(process.env[ENV_MAP.weatherTool]),
     teacherMode: parseFlag(process.env[ENV_MAP.teacherMode]),
+    twoFactorAuth: parseFlag(process.env[ENV_MAP.twoFactorAuth]),
   };
   _cached = flags;
   return flags;
@@ -65,6 +68,7 @@ export const FEATURE_SHARE_CONVERSATIONS = getFeatureFlags().shareConversations;
 export const FEATURE_UPLOAD_FILES = getFeatureFlags().uploadFiles;
 export const FEATURE_WEATHER_TOOL = getFeatureFlags().weatherTool;
 export const FEATURE_TEACHER_MODE = getFeatureFlags().teacherMode;
+export const FEATURE_TWO_FACTOR_AUTH = getFeatureFlags().twoFactorAuth;
 
 // Serialize for client hydration
 export function serializeFeatureFlags() {

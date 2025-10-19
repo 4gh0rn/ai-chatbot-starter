@@ -68,7 +68,11 @@ export function Console({ consoleOutputs, setConsoleOutputs }: ConsoleProps) {
   }, [resize, stopResizing]);
 
   useEffect(() => {
-    consoleEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Add delay to ensure DOM is ready after hydration
+    const timer = setTimeout(() => {
+      consoleEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {

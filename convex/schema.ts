@@ -8,6 +8,10 @@ export default defineSchema({
     password: v.optional(v.string()),
     createdAt: v.number(),
     type: v.union(v.literal("guest"), v.literal("regular")),
+    // 2FA fields
+    twoFactorEnabled: v.optional(v.boolean()),
+    twoFactorSecret: v.optional(v.string()),
+    backupCodes: v.optional(v.array(v.string())),
   }).index("by_email", ["email"]),
 
   chats: defineTable({

@@ -35,19 +35,26 @@ const LIGHT_THEME_COLOR = "hsl(0 0% 100%)";
 const DARK_THEME_COLOR = "hsl(240deg 10% 3.92%)";
 const THEME_COLOR_SCRIPT = `\
 (function() {
+  if (typeof document === 'undefined') return;
   var html = document.documentElement;
   var meta = document.querySelector('meta[name="theme-color"]');
   if (!meta) {
     meta = document.createElement('meta');
     meta.setAttribute('name', 'theme-color');
-    document.head.appendChild(meta);
+    if (document.head) {
+      document.head.appendChild(meta);
+    }
   }
   function updateThemeColor() {
-    var isDark = html.classList.contains('dark');
-    meta.setAttribute('content', isDark ? '${DARK_THEME_COLOR}' : '${LIGHT_THEME_COLOR}');
+    if (meta && html) {
+      var isDark = html.classList.contains('dark');
+      meta.setAttribute('content', isDark ? '${DARK_THEME_COLOR}' : '${LIGHT_THEME_COLOR}');
+    }
   }
-  var observer = new MutationObserver(updateThemeColor);
-  observer.observe(html, { attributes: true, attributeFilter: ['class'] });
+  if (typeof MutationObserver !== 'undefined') {
+    var observer = new MutationObserver(updateThemeColor);
+    observer.observe(html, { attributes: true, attributeFilter: ['class'] });
+  }
   updateThemeColor();
 })();`;
 
@@ -85,7 +92,13 @@ export default function RootLayout({
               enableSystem
             >
               <Toaster position="top-center" />
-              <SessionProvider>{children}</SessionProvider>
+              <SessionProvider 
+                refetchInterval={5 * 60} 
+                refetchOnWindowFocus={false}
+                refetchWhenOffline={false}
+              >
+                {children}
+              </SessionProvider>
             </ThemeProvider>
           </FeatureFlagsProvider>
         </ConvexClientProvider>

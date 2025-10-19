@@ -155,6 +155,8 @@ All feature flags follow the pattern `APP_ENABLE_<FEATURE>` and default to disab
 | Share Conversations | Enable public visibility and sharing toggle for chats | `APP_ENABLE_SHARE_CONVERSATIONS` | false |
 | Upload Files | Allow uploading attachments in chat input | `APP_ENABLE_UPLOAD_FILES` | false |
 | Weather Tool | Activate the `getWeather` tool (UI + model tool calls) | `APP_ENABLE_WEATHER_TOOL` | false |
+| Teacher Mode | Enable teacher mode features for educational contexts | `APP_ENABLE_TEACHER_MODE` | false |
+| Two-Factor Authentication | Enable TOTP-based 2FA for user accounts | `APP_ENABLE_TWO_FACTOR_AUTH` | false |
 
 Truthy values: `1`, `true`, `on`, `yes` (case-insensitive). Any other non-empty value is treated as enabled for forward compatibility.
 
@@ -165,6 +167,8 @@ APP_ENABLE_GUEST_ACCOUNTS=true
 APP_ENABLE_SHARE_CONVERSATIONS=1
 APP_ENABLE_UPLOAD_FILES=on
 APP_ENABLE_WEATHER_TOOL=yes
+APP_ENABLE_TEACHER_MODE=true
+APP_ENABLE_TWO_FACTOR_AUTH=true
 ```
 
 When a feature is disabled:
@@ -175,6 +179,33 @@ When a feature is disabled:
 Implementation details are in `lib/feature-flags.tsx`.
 
 Create `.env.local` from `.env.example` and supply these as needed.
+
+### Two-Factor Authentication (2FA)
+
+When `APP_ENABLE_TWO_FACTOR_AUTH=true`, the application supports TOTP-based two-factor authentication:
+
+**Features:**
+- **TOTP Setup**: Users can enable 2FA with QR codes for authenticator apps (Google Authenticator, Authy, 1Password, etc.)
+- **Backup Codes**: 8 single-use recovery codes generated during setup
+- **Login Flow**: Automatic 2FA verification step during sign-in for enabled users
+- **Management**: Users can disable 2FA or regenerate backup codes in Settings
+
+**Dependencies:**
+- `speakeasy`: TOTP token generation and verification
+- `qrcode`: QR code generation for authenticator app setup
+
+**Usage:**
+1. User enables 2FA in `/settings` (available for regular accounts only)
+2. Scans QR code with authenticator app
+3. Enters verification code to confirm setup
+4. Receives backup codes for safekeeping
+5. Future logins require TOTP code or backup code after password
+
+**Security Notes:**
+- Guest accounts cannot use 2FA
+- Backup codes are single-use and should be stored securely
+- TOTP secrets are stored encrypted in the database
+- 2FA is enforced at the login action level before session creation
 
 ## Scripts
 

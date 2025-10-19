@@ -6,15 +6,17 @@ import { FEATURE_GUEST_ACCOUNTS } from "./lib/feature-flags";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  /*
-   * Playwright starts the dev server and requires a 200 status to
-   * begin the tests, so this ensures that the tests can start
-   */
+  // Playwright health check
   if (pathname.startsWith("/ping")) {
     return new Response("pong", { status: 200 });
   }
 
-  if (pathname.startsWith("/api/auth")) {
+  // Skip middleware for auth APIs, static files, and assets
+  if (
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/_next/") ||
+    pathname.includes(".")
+  ) {
     return NextResponse.next();
   }
 
@@ -24,29 +26,23 @@ export async function middleware(request: NextRequest) {
     secureCookie: !isDevelopmentEnvironment,
   });
 
-  const openAuthPaths = ["/", "/login", "/register", "/login/form"];
+  const isAuthPage = ["/", "/login", "/register", "/login/form"].includes(pathname);
+  const isProtectedPage = pathname.startsWith("/chat") || pathname.startsWith("/settings");
 
+  // Unauthenticated users
   if (!token) {
-    // Allow unauthenticated users to view landing and auth pages without forced guest provisioning.
-    if (openAuthPaths.includes(pathname)) {
-      return NextResponse.next();
-    }
-    // Redirect all other unauthenticated requests to landing page
+    if (isAuthPage) return NextResponse.next();
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  const isGuest = guestRegex.test(token?.email ?? "");
-
-  if (
-    token &&
-    !isGuest &&
-    ["/", "/login", "/register", "/login/form"].includes(pathname)
-  ) {
+  // Authenticated users on auth pages - redirect to chat
+  if (isAuthPage) {
     return NextResponse.redirect(new URL("/chat", request.url));
   }
 
-  // If guest accounts are disabled and the user is a guest, force upgrade path.
-  if (token && isGuest && !FEATURE_GUEST_ACCOUNTS) {
+  // Guest account restrictions
+  const isGuest = guestRegex.test(token?.email ?? "");
+  if (isGuest && !FEATURE_GUEST_ACCOUNTS && pathname !== "/login") {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
