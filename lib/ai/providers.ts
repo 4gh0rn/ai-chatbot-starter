@@ -1,11 +1,27 @@
 import { gateway } from "@ai-sdk/gateway";
-import {
-  customProvider,
-  extractReasoningMiddleware,
-  wrapLanguageModel,
-} from "ai";
+import { customProvider } from "ai";
+import { createOllamaLanguageModel } from "./ollama-provider";
 import { isTestEnvironment } from "../constants";
 
+const useOllama = process.env.OLLAMA_BASE_URL;
+
+// Get the appropriate language model based on model ID
+export function getLanguageModel(modelId: string) {
+  // Check if it's an Ollama model
+  if (modelId.startsWith('ollama-') && useOllama) {
+    const actualModelName = modelId.replace('ollama-', '');
+    return createOllamaLanguageModel(
+      actualModelName,
+      process.env.OLLAMA_BASE_URL!,
+      process.env.OLLAMA_API_KEY
+    );
+  }
+  
+  // Default to Claude models
+  return gateway.languageModel("anthropic/claude-sonnet-4");
+}
+
+// Create a dynamic provider that can resolve any model ID
 export const myProvider = isTestEnvironment
   ? (() => {
       const {
@@ -23,14 +39,7 @@ export const myProvider = isTestEnvironment
         },
       });
     })()
-  : customProvider({
-      languageModels: {
-        "chat-model": gateway.languageModel("anthropic/claude-sonnet-4"),
-        "chat-model-reasoning": wrapLanguageModel({
-          model: gateway.languageModel("anthropic/claude-sonnet-4"),
-          middleware: extractReasoningMiddleware({ tagName: "think" }),
-        }),
-        "title-model": gateway.languageModel("anthropic/claude-sonnet-4"),
-        "artifact-model": gateway.languageModel("anthropic/claude-sonnet-4"),
-      },
-    });
+  : {
+      // Custom provider that can handle any model ID dynamically
+      languageModel: (modelId: string) => getLanguageModel(modelId),
+    };

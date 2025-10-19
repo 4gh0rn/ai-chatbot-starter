@@ -6,7 +6,20 @@ export type ChatModel = {
   description: string;
 };
 
-export const chatModels: ChatModel[] = [
+const ollamaModels: ChatModel[] = [
+  {
+    id: "chat-model",
+    name: "Llama 3.2 (Ollama)",
+    description: "Local Llama 3.2 model running on Ollama",
+  },
+  {
+    id: "chat-model-reasoning",
+    name: "Llama 3.2 (Ollama)",
+    description: "Local Llama 3.2 model for reasoning tasks",
+  },
+];
+
+const claudeModels: ChatModel[] = [
   {
     id: "chat-model",
     name: "Claude 4 - Sonnet",
@@ -19,3 +32,11 @@ export const chatModels: ChatModel[] = [
       "Uses advanced chain-of-thought reasoning for complex problems",
   },
 ];
+
+// Static export for build-time compatibility
+export const chatModels: ChatModel[] = claudeModels;
+
+// Client-side function to get the right models
+export function getChatModelsForProvider(provider: 'ollama' | 'claude'): ChatModel[] {
+  return provider === 'ollama' ? ollamaModels : claudeModels;
+}

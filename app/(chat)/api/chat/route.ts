@@ -25,7 +25,7 @@ import { resolveChatIdentifier } from "@/convex/chats";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import type { ChatModel } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
-import { myProvider } from "@/lib/ai/providers";
+import { myProvider, getLanguageModel } from "@/lib/ai/providers";
 import { createDocument } from "@/lib/ai/tools/create-document";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
@@ -143,6 +143,7 @@ export async function POST(request: Request) {
     } else {
       const title = await generateTitleFromUserMessage({
         message,
+        selectedChatModel,
       });
       await fetchMutation(api.chats.saveChat, {
         externalId: id,
@@ -211,8 +212,10 @@ export async function POST(request: Request) {
 
     const stream = createUIMessageStream({
       execute: ({ writer: dataStream }) => {
+        const model = getLanguageModel(selectedChatModel);
+        
         const result = streamText({
-          model: myProvider.languageModel(selectedChatModel),
+          model,
           system: systemPrompt({ selectedChatModel, requestHints, teacherMode }),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
@@ -251,8 +254,8 @@ export async function POST(request: Request) {
           onFinish: async ({ usage }) => {
             try {
               const providers = await getTokenlensCatalog();
-              const modelId =
-                myProvider.languageModel(selectedChatModel).modelId;
+              const model = getLanguageModel(selectedChatModel);
+              const modelId = model.modelId;
               if (!modelId) {
                 finalMergedUsage = usage;
                 dataStream.write({

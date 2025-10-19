@@ -11,8 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
-import { chatModels } from "@/lib/ai/models";
 import { cn } from "@/lib/utils";
+import { useAiProvider } from "@/hooks/use-ai-provider";
 import { CheckCircleFillIcon, ChevronDownIcon } from "./icons";
 
 export function ModelSelector({
@@ -29,6 +29,7 @@ export function ModelSelector({
 
   const userType = session.user.type;
   const { availableChatModelIds } = entitlementsByUserType[userType];
+  const { chatModels, isLoading } = useAiProvider();
 
   const availableChatModels = chatModels.filter((chatModel) =>
     availableChatModelIds.includes(chatModel.id)

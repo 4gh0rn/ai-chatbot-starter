@@ -130,7 +130,8 @@ export const systemPrompt = ({
   // Choose the appropriate base prompt based on teacher mode
   const basePrompt = teacherMode ? teacherPrompt : regularPrompt;
 
-  if (selectedChatModel === "chat-model-reasoning") {
+  // For reasoning models and Ollama models, skip artifacts prompt to avoid confusion
+  if (selectedChatModel === "chat-model-reasoning" || selectedChatModel.startsWith("ollama-")) {
     return `${basePrompt}\n\n${requestPrompt}`;
   }
 

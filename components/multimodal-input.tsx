@@ -21,7 +21,7 @@ import { useLocalStorage, useWindowSize } from "usehooks-ts";
 import { saveChatModelAsCookie } from "@/app/(chat)/actions";
 import { SelectItem } from "@/components/ui/select";
 import { useFeatureFlags } from "@/hooks/use-feature-flags";
-import { chatModels } from "@/lib/ai/models";
+import { useAiProvider } from "@/hooks/use-ai-provider";
 import { myProvider } from "@/lib/ai/providers";
 import {
   ALLOWED_UPLOAD_MIME_TYPES,
@@ -451,6 +451,7 @@ function PureModelSelectorCompact({
     setOptimisticModelId(selectedModelId);
   }, [selectedModelId]);
 
+  const { chatModels } = useAiProvider();
   const selectedModel = chatModels.find(
     (model) => model.id === optimisticModelId
   );
